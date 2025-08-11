@@ -1,3 +1,99 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:065c6d77f92c87575eb5d73d3afd8d17d024aef8de664b8d30e758aef2e76621
-size 2400
+export let cart;
+
+loadFromStorage();
+
+export function loadFromStorage(){
+    cart = JSON.parse(localStorage.getItem('cart')) || [{
+        productId: 'e43638ce-6aa0-4b85-b27f-e1d07eb678c6',
+        quantity: 2,
+        deliveryOptionId: '1'
+    },{
+        productId: '15b6fc6f-327a-4ec4-896f-486349e85a3d',
+        quantity: 1,
+        deliveryOptionId: '2'
+    }];
+}
+
+export function saveToStorage(){
+    localStorage.setItem('cart', JSON.stringify(cart));
+}
+
+// export function addToCart(productId){
+//     let matchingItem;
+//     cart.forEach((cartItem) => {
+//         if (cartItem.productId === productId){
+//             matchingItem = cartItem;
+//         }
+//     })
+
+//     if (matchingItem){
+//         matchingItem.quantity += 1;
+//     } else {
+//         cart.push({
+//             productId: productId,
+//             quantity: 1,
+//             deliveryOptionId: '1'
+//         })
+//     }
+//     saveToStorage()
+// }
+
+export function addToCart(productId, quantity = 1) {
+    let matchingItem = cart.find((cartItem) => cartItem.productId === productId);
+
+    if (matchingItem) {
+        matchingItem.quantity += quantity;
+    } else {
+        cart.push({
+            productId: productId,
+            quantity: quantity,
+            deliveryOptionId: '1'
+        });
+    }
+
+    saveToStorage();
+}
+
+
+export function removeFromCart(productId){
+    let newCart = [];
+    cart.forEach((cartItem) => {
+        if (cartItem.productId !== productId){
+            newCart.push(cartItem);
+        }
+    })
+    cart = newCart;
+    console.log(cart)
+    saveToStorage();
+}
+
+export function updateDeliveryOptions(productId, deliveryOptionId){
+    let matchingItem;
+    cart.forEach((cartItem) => {
+        if (cartItem.productId === productId){
+            matchingItem = cartItem;
+        }
+    })
+
+    matchingItem.deliveryOptionId = deliveryOptionId;
+    saveToStorage();
+}
+
+export function loadCart(fun){
+  const xhr = new XMLHttpRequest();
+
+  xhr.addEventListener('load', () => {
+    console.log(xhr.response);
+    fun();
+  })
+
+  xhr.open('GET', 'https://supersimplebackend.dev/cart');
+  xhr.send();
+}
+
+export async function loadCartFetch() {
+  const response = await fetch('https://supersimplebackend.dev/cart');
+  const text = await response.text();
+  console.log(text);
+  return text;
+};
